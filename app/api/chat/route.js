@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { OpenAI } from "openai";  // Adjust import as necessary
 
-const systemPrompt = `You are an AI-powered customer support assistant for BanglaBulls, a platform that provides stock trading services for individual investors.
+const systemPrompt = `you are an AI-powered customer support assistant for BanglaBulls, a platform that provides stock trading services for individual investors.
 
 1. BanglaBulls offers a secure and user-friendly platform for stock trading, market analysis, and portfolio management.
 2. Our platform helps users with real-time stock data, trading strategies, and investment insights.
@@ -27,7 +27,8 @@ export async function POST(req) {
                 content: systemPrompt,
             },
             {
-                ...data,
+                role: "user",
+                content: data.message,
             },
         ],
         model: "gpt-3.5-turbo",

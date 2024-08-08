@@ -6,25 +6,41 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 
 export default function Home() {
-  const [message, setMessage] = useState({
-    role: "assistant",
-    content: "I am an AI-powered customer support assistant for BanglaBulls, how can I help you?"
-  });
-
-  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([
+    {
+      role: "assistant",
+      content: "I am an AI-powered customer support assistant for BanglaBulls, how can I help you?"
+    }
+  ]);
 
   const sendMessage = async () => {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message }),
-    });
-
-    const data = await response.json();
-    setMessages((prevMessages) => [...prevMessages, data]);
+    const userMessage = { role: "user", content: input };
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+  
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: userMessage }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      setMessages((prevMessages) => [...prevMessages, data]);
+    } catch (error) {
+      console.error('Error fetching response:', error);
+      setMessages((prevMessages) => [...prevMessages, { role: "assistant", content: "Sorry, something went wrong. Please try again later." }]);
+    }
+  
+    setInput("");
   };
+  
 
   return (
     <Box
@@ -75,8 +91,8 @@ export default function Home() {
           <TextField
             label="Message"
             fullWidth
-            value={message.content}
-            onChange={(e) => setMessage({ ...message, content: e.target.value })}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
           />
           <Button variant="contained" onClick={sendMessage}>
             Send
