@@ -1,46 +1,57 @@
 "use client";
 import { useState } from "react";
-import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import { Typography } from "@mui/material";
-import StockChartWidget from './components/StockChartWidget';
+import StockChartWidget from "./components/StockChartWidget";
+import { Box, Stack, Typography, TextField, Button } from "@mui/material";
 
 export default function Home() {
-  const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "I am an AI-powered customer support assistant, how can I help you?"
-    }
+      content:
+        "I am an AI-powered customer support assistant, how can I help you?",
+    },
   ]);
 
+  const [message, setMessage] = useState("");
+
   const sendMessage = async () => {
-    const userMessage = { role: "user", content: input };
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    setMessage("");
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { role: "user", content: message },
+      { role: "assistant", content: "" },
+    ]);
 
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: userMessage }),
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify([...messages, { role: "user", content: message }]),
+    }).then(async (res) => {
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+
+      let result = "";
+      return reader.read().then(function processText({ done, value }) {
+        if (done) {
+          return result;
+        }
+        const text = decoder.decode(value || new Int8Array(), { stream: true });
+        setMessages((messages) => {
+          let lastMessage = messages[messages.length - 1];
+          let otherMessages = messages.slice(0, messages.length - 1);
+          return [
+            ...otherMessages,
+            {
+              ...lastMessage,
+              content: lastMessage.content + text,
+            },
+          ];
+        });
+        return reader.read().then(processText);
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setMessages((prevMessages) => [...prevMessages, data]);
-    } catch (error) {
-      console.error('Error fetching response:', error);
-      setMessages((prevMessages) => [...prevMessages, { role: "assistant", content: "Sorry, something went wrong. Please try again later." }]);
-    }
-
-    setInput("");
+    });
   };
 
   return (
@@ -51,36 +62,48 @@ export default function Home() {
       height="100vh"
       justifyContent="center"
       alignItems="center"
-      sx={{ background: 'linear-gradient(to right, #C0C0C0, #A9A9A9)', color: 'black' }}
+      sx={{
+        background: "#0A0A0A",
+      }}
     >
-      <Box 
-        width="25%" 
-        height="90%" 
-        sx={{ 
-          padding: 2, 
-          overflow: 'hidden', 
-          border: '1px solid #444', 
-          borderRadius: '10px', 
-          borderColor: '#FF4500', 
-          boxShadow: '0 0 10px #FF4500',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginRight: '2in'
+      <Box
+        width="50%"
+        height="700px"
+        sx={{
+          overflow: "hidden",
+          border: "1px solid #444",
+          borderTopLeftRadius: "10px",
+          borderBottomLeftRadius: "10px",
+          borderColor: "#00ffff",
+          boxShadow: "0 0 10px #00FFFF",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
         <StockChartWidget />
       </Box>
       <Stack
         direction="column"
-        width="600px"
+        width="50%"
         height="700px"
         border="1px solid #444"
         p={2}
         spacing={3}
-        sx={{ backgroundColor: '#000000', borderRadius: '10px', borderColor: '#00FFFF', boxShadow: '0 0 10px #00FFFF' }}
+        sx={{
+          backgroundColor: "#0A0A0A",
+          borderTopRightRadius: "10px",
+          borderBottomRightRadius: "10px",
+          borderColor: "#00FFFF",
+          boxShadow: "0 0 10px #00FFFF",
+        }}
       >
-        <Typography variant="h4" align="center" gutterBottom sx={{ color: 'white' }}>
+        <Typography
+          variant="h4"
+          align="center"
+          gutterBottom
+          sx={{ color: "white" }}
+        >
           AI Assistant
         </Typography>
         <Stack
@@ -95,17 +118,23 @@ export default function Home() {
             <Box
               key={index}
               display="flex"
-              justifyContent={message.role === "assistant" ? "flex-start" : "flex-end"}
+              justifyContent={
+                message.role === "assistant" ? "flex-start" : "flex-end"
+              }
             >
               <Box
-                bgcolor={message.role === "assistant" ? "#333333" : "#1E90FF"}
+                bgcolor={message.role === "assistant" ? "#087f5b" : "#c92a2a"}
                 p={2}
                 borderRadius="10px"
                 width="fit-content"
                 maxWidth="80%"
                 display="flex"
                 alignItems="center"
-                sx={{ color: 'white', fontFamily: 'Roboto, sans-serif', fontWeight: 'bold' }}
+                sx={{
+                  color: "white",
+                  fontFamily: "Roboto, sans-serif",
+                  fontWeight: "bold",
+                }}
               >
                 {message.content}
               </Box>
@@ -116,20 +145,43 @@ export default function Home() {
           <TextField
             label="Message"
             fullWidth
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            sx={{ input: { color: 'white' }, label: { color: 'white' } }}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            sx={{
+              input: { color: "white" },
+              label: { color: "white" },
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "white",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#00FFFF",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#00FFFF",
+                },
+              },
+              "& .MuiInputLabel-root": {
+                color: "white",
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "#00FFFF",
+              },
+              "& .MuiInputLabel-root:hover": {
+                color: "#00FFFF",
+              },
+            }}
           />
-          <Button 
-            variant="contained" 
-            onClick={sendMessage} 
-            sx={{ 
-              backgroundColor: '#00FFFF', 
-              color: '#000000',
-              boxShadow: '0 0 10px #00FFFF',
-              '&:hover': {
-                backgroundColor: '#00CED1',
-                boxShadow: '0 0 15px #00FFFF',
+          <Button
+            variant="contained"
+            onClick={sendMessage}
+            sx={{
+              backgroundColor: "#00FFFF",
+              color: "#000000",
+              boxShadow: "0 0 10px #00FFFF",
+              "&:hover": {
+                backgroundColor: "#00CED1",
+                boxShadow: "0 0 15px #00FFFF",
               },
             }}
           >
