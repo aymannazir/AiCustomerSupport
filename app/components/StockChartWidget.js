@@ -1,14 +1,30 @@
 import React, { useEffect } from "react";
 
-const StockChartWidget = () => {
+const StockChartWidget = ({ sy }) => {
   useEffect(() => {
+    const widgetContainer = document.getElementById(
+      "tradingview-widget-container__widget"
+    );
+    const existingScript = document.getElementById("tradingview-widget-script");
+
+    if (existingScript) {
+      existingScript.remove();
+    }
+
     const script = document.createElement("script");
+    script.id = "tradingview-widget-script";
     script.src =
       "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
     script.async = true;
+    script.onload = () => {
+      console.log("TradingView script loaded");
+    };
+    script.onerror = () => {
+      console.error("Error loading TradingView widget script.");
+    };
     script.innerHTML = JSON.stringify({
       autosize: true,
-      symbol: "NASDAQ:AAPL",
+      symbol: sy,
       interval: "D",
       timezone: "Etc/UTC",
       theme: "dark",
@@ -20,22 +36,31 @@ const StockChartWidget = () => {
       studies: ["STD;24h%Volume"],
       support_host: "https://www.tradingview.com",
     });
-    document
-      .getElementById("tradingview-widget-container__widget")
-      .appendChild(script);
-  }, []);
+
+    if (widgetContainer) {
+      widgetContainer.appendChild(script);
+    } else {
+      console.error("Widget container not found");
+    }
+
+    return () => {
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, [sy]);
 
   return (
     <div
       className="tradingview-widget-container"
-      style={{ height: "100%", width: "100%" }}
+      style={{ height: "100%", width: "100%", position: "relative" }}
     >
       <div
         id="tradingview-widget-container__widget"
         style={{
-          height: "calc(100% - 32px)",
+          height: "100%",
           width: "100%",
-          backgroundColor: "#ffff",
+          position: "relative",
         }}
       ></div>
       <div className="tradingview-widget-copyright">

@@ -13,15 +13,22 @@ export default function Home() {
   ]);
 
   const [message, setMessage] = useState("");
+  const [stockSymbol, setStockSymbol] = useState("");
 
   const sendMessage = async () => {
+    const match = message.match(/Show me stock (\w+)/i);
+    if (match) {
+      const symbol = match[1];
+      setStockSymbol(`NASDAQ:${symbol}`);
+    }
+
     setMessage("");
     setMessages((prevMessages) => [
       ...prevMessages,
       { role: "user", content: message },
       { role: "assistant", content: "" },
     ]);
-  
+
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -30,11 +37,11 @@ export default function Home() {
         },
         body: JSON.stringify([...messages, { role: "user", content: message }]),
       });
-  
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let result = "";
-  
+
       await reader.read().then(function processText({ done, value }) {
         if (done) {
           console.log("Stream finished:", result);
@@ -86,7 +93,7 @@ export default function Home() {
           alignItems: "center",
         }}
       >
-        <StockChartWidget />
+        <StockChartWidget sy={stockSymbol} key={stockSymbol} />
       </Box>
       <Stack
         direction="column"
@@ -101,6 +108,7 @@ export default function Home() {
           borderBottomRightRadius: "10px",
           borderColor: "#00FFFF",
           boxShadow: "0 0 10px #00FFFF",
+          overflow: "hidden",
         }}
       >
         <Typography
@@ -114,7 +122,7 @@ export default function Home() {
         <Stack
           direction="column"
           flexGrow={1}
-          overflowY="auto"
+          overflow="auto"
           spacing={2}
           p={2}
           maxHeight="100%"
@@ -197,4 +205,3 @@ export default function Home() {
     </Box>
   );
 }
-
