@@ -1,15 +1,11 @@
 "use client";
 import { useState } from "react";
-import Box from "@mui/material/Box"; 
-import Stack from "@mui/material/Stack"; 
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { Typography } from "@mui/material";
-import TrendingUpIcon from '@mui/icons-material/TrendingUp'; // Bull icon
-import TrendingDownIcon from '@mui/icons-material/TrendingDown'; // Bear icon
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney'; // Dollar icon
-import ShowChartIcon from '@mui/icons-material/ShowChart'; // Chart icon
-import PieChartIcon from '@mui/icons-material/PieChart'; // Pie chart icon
+import StockChartWidget from './components/StockChartWidget';
 
 export default function Home() {
   const [input, setInput] = useState("");
@@ -23,7 +19,7 @@ export default function Home() {
   const sendMessage = async () => {
     const userMessage = { role: "user", content: input };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
-  
+
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -32,31 +28,49 @@ export default function Home() {
         },
         body: JSON.stringify({ message: userMessage }),
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const data = await response.json();
       setMessages((prevMessages) => [...prevMessages, data]);
     } catch (error) {
       console.error('Error fetching response:', error);
       setMessages((prevMessages) => [...prevMessages, { role: "assistant", content: "Sorry, something went wrong. Please try again later." }]);
     }
-  
+
     setInput("");
   };
 
   return (
     <Box
       display="flex"
-      flexDirection="column"
+      flexDirection="row"
       width="100%"
       height="100vh"
       justifyContent="center"
       alignItems="center"
       sx={{ background: 'linear-gradient(to right, #C0C0C0, #A9A9A9)', color: 'black' }}
     >
+      <Box 
+        width="25%" 
+        height="90%" 
+        sx={{ 
+          padding: 2, 
+          overflow: 'hidden', 
+          border: '1px solid #444', 
+          borderRadius: '10px', 
+          borderColor: '#FF4500', 
+          boxShadow: '0 0 10px #FF4500',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginRight: '2in'
+        }}
+      >
+        <StockChartWidget />
+      </Box>
       <Stack
         direction="column"
         width="600px"
@@ -123,15 +137,6 @@ export default function Home() {
           </Button>
         </Stack>
       </Stack>
-      <Box position="absolute" bottom="20px" left="20px">
-        <TrendingUpIcon style={{ fontSize: 50, color: '#4CAF50' }} />
-        <AttachMoneyIcon style={{ fontSize: 50, color: '#FFD700' }} />
-        <ShowChartIcon style={{ fontSize: 50, color: '#00CED1' }} />
-      </Box>
-      <Box position="absolute" bottom="20px" right="20px">
-        <TrendingDownIcon style={{ fontSize: 50, color: '#F44336' }} />
-        <PieChartIcon style={{ fontSize: 50, color: '#FFA500' }} />
-      </Box>
     </Box>
   );
 }
