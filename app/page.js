@@ -21,20 +21,23 @@ export default function Home() {
       { role: "user", content: message },
       { role: "assistant", content: "" },
     ]);
-
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify([...messages, { role: "user", content: message }]),
-    }).then(async (res) => {
-      const reader = res.body.getReader();
+  
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify([...messages, { role: "user", content: message }]),
+      });
+  
+      const reader = response.body.getReader();
       const decoder = new TextDecoder();
-
       let result = "";
-      return reader.read().then(function processText({ done, value }) {
+  
+      await reader.read().then(function processText({ done, value }) {
         if (done) {
+          console.log("Stream finished:", result);
           return result;
         }
         const text = decoder.decode(value || new Int8Array(), { stream: true });
@@ -51,7 +54,9 @@ export default function Home() {
         });
         return reader.read().then(processText);
       });
-    });
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
   return (
@@ -104,7 +109,7 @@ export default function Home() {
           gutterBottom
           sx={{ color: "white" }}
         >
-          AI Assistant
+          AI Stock Assistant
         </Typography>
         <Stack
           direction="column"
@@ -192,3 +197,4 @@ export default function Home() {
     </Box>
   );
 }
+
