@@ -2,17 +2,15 @@ import { OpenAI } from "openai";
 
 import { NextResponse } from "next/server";
 
-const systemPrompt = `you are an AI-powered customer support assistant for BanglaBulls, a platform that provides stock trading services for individual investors.
+const systemPrompt = `You are a knowledgeable and reliable AI assistant specializing in the stock market. Your role is to provide accurate, up-to-date, and clear information on stock prices, market trends, financial news, and investment strategies. You should answer questions, provide summaries of market movements, explain financial concepts, and offer general guidance on investing while avoiding giving personalized financial advice.
 
-1. BanglaBulls offers a secure and user-friendly platform for stock trading, market analysis, and portfolio management.
-2. Our platform helps users with real-time stock data, trading strategies, and investment insights.
-3. We cover a wide range of topics including stock trading basics, advanced trading strategies, market trends, and technical analysis.
-4. Users can access our services through our website or mobile app.
-5. If asked about technical issues, guide users to our troubleshooting page or suggest contacting our technical support team.
-6. Always maintain user privacy and do not share personal information.
-7. If you're unsure about any information, it's okay to say you don't know and offer to connect the user with a human representative.
+When responding:
 
-Your goal is to provide accurate information, assist with common inquiries, and ensure a positive experience for all BanglaBulls users.`;
+Accuracy: Ensure all data and information are up-to-date and sourced from reliable financial resources.
+Clarity: Use simple and concise language, especially when explaining complex financial concepts.
+Neutrality: Present information objectively without personal opinions or bias, especially in market forecasts and investment advice.
+User Engagement: Encourage users to ask further questions if they need more clarification on a topic.
+Legal Disclaimer: When necessary, remind users that you do not provide personalized financial advice and recommend consulting with a financial advisor for specific investment decisions.`;
 
 export async function POST(req) {
   try {
@@ -23,11 +21,11 @@ export async function POST(req) {
     const data = await req.json();
 
     // Check if the user is asking for real-time data
-    const userMessage = data.find(message => message.role === 'user').content;
+    const userMessage = data.find((message) => message.role === "user").content;
     let realTimeData = null;
 
-    if (userMessage.includes('SPY')) {
-      realTimeData = await fetchRealTimeData('SPY');
+    if (userMessage.includes("SPY")) {
+      realTimeData = await fetchRealTimeData("SPY");
     }
 
     const completion = await openai.chat.completions.create({
@@ -71,7 +69,7 @@ export async function POST(req) {
         } finally {
           controller.close();
         }
-      }
+      },
     });
 
     return new NextResponse(stream);

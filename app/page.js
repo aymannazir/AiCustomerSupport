@@ -20,6 +20,7 @@ export default function Home() {
     if (match) {
       const symbol = match[1];
       setStockSymbol(`NASDAQ:${symbol}`);
+      return;
     }
 
     setMessage("");
