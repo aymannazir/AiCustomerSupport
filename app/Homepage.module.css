@@ -1,0 +1,202 @@
+/* Container */
+.container {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+/* Hero Section */
+.heroSection {
+    background-color: #f4f4f4;
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.heroSection h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: #000;
+}
+.heroSection h2 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: #00aaff;
+}
+
+.heroSection p {
+    font-size: 18px;
+    color: #000000;
+    margin-bottom: 20px;
+}
+
+.ctaButtons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.joinWaitlist {
+    background-color: #00aaff;
+    color: #fff;
+    padding: 15px 30px;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 5px;
+}
+
+.counter {
+    font-size: 16px;
+    color: #555;
+}
+
+/* Features Section */
+.featuresSection {
+    display: flex;
+    justify-content: space-around;
+    padding: 50px 20px;
+    background-color: #fff;
+    gap: 20px;
+}
+
+.featureBoxes {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+}
+
+.featureBox {
+    background-color: #e6f7ff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    flex: 1;
+    max-width: 200px;
+}
+
+.featureBox h3 {
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: #00aaff;
+}
+
+.featureBox p {
+    font-size: 16px;
+}
+
+/* Pricing Section */
+.pricingSection {
+    padding: 50px 20px;
+    background-color: #fff;
+    text-align: center;
+}
+
+.pricingSection h2 {
+    font-size: 36px;
+    margin-bottom: 30px;
+    color: #00aaff;
+}
+
+.pricingPlans {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.plan {
+    background-color: #e6f7ff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 300px;
+    flex: 1;
+}
+
+.plan h3 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #000;
+}
+
+.plan p {
+    font-size: 18px;
+}
+
+/* Benefits Section */
+.benefitsSection {
+    padding: 50px 20px;
+    background-color: #f9f9f9;
+    text-align: center;
+}
+
+.benefitsSection h2 {
+    font-size: 36px;
+    margin-bottom: 30px;
+    color: #000;
+}
+
+.benefitCards {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.benefitCard {
+    background-color: #fff;
+    border: 2px solid #e6f7ff;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 300px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    flex: 1;
+}
+
+.benefitCard h3 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #00aaff;
+}
+
+.benefitCard p {
+    font-size: 16px;
+    color: #555;
+}
+
+/* Waitlist Section */
+.waitlistSection {
+    padding: 50px 20px;
+    background-color: #000;
+    color: #fff;
+    text-align: center;
+}
+
+.waitlistSection h2 {
+    font-size: 36px;
+    color: #00aaff;
+}
+
+.waitlistSection p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.waitlistSection form input[type="email"] {
+    padding: 15px;
+    font-size: 16px;
+    width: 300px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 5px;
+}
+
+.waitlistSection form input[type="submit"] {
+    background-color: #00aaff;
+    color: #fff;
+    padding: 15px 30px;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 5px;
+}
