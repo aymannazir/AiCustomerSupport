@@ -21,8 +21,7 @@ Legal Disclaimer: When necessary, remind users that you do not provide personali
 
 export async function POST(req) {
   const openai = new OpenAI({
-    apiKey:
-      "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",
+    apiKey: "",
   });
 
   const data = await req.json();
