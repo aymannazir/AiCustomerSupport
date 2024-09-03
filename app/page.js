@@ -1,7 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StockChartWidget from "./components/StockChartWidget";
 import Assistant from "./components/Assistant";
+import useStockStore from "./useUserstore";
+
 import {
   Box,
   Button,
@@ -16,10 +18,17 @@ import { OpenIcon, CloseIcon, GraphIcon } from "./components/icons";
 export default function Home() {
   const [chartOpen, setChartOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const symbol = useStockStore((state) => state.symbol);
 
   const toggleChart = () => {
     setChartOpen(!chartOpen);
   };
+
+  useEffect(() => {
+    if (symbol !== "") {
+      setChartOpen(true);
+    }
+  }, [symbol]); // Dependency array ensures this runs only when `symbol` changes
 
   const toggleDrawer = () => {
     setDrawerOpen(!drawerOpen);
@@ -141,10 +150,7 @@ export default function Home() {
                 alignItems: "center",
               }}
             >
-              <StockChartWidget
-                sy={Assistant.stockSymbol}
-                key={Assistant.stockSymbol}
-              />
+              <StockChartWidget sy={symbol} key={symbol} />
             </Box>
           )}
           <Assistant />

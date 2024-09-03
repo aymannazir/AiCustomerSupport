@@ -1,5 +1,7 @@
+"use client";
+import React, { useState } from "react";
 import { Box, Stack, Typography, TextField, Button } from "@mui/material";
-import { useState } from "react";
+import useStockStore from "../useUserstore";
 
 export default function Assistant() {
   const [messages, setMessages] = useState([
@@ -9,18 +11,12 @@ export default function Assistant() {
         "I am an AI-powered customer support assistant, how can I help you?",
     },
   ]);
-
+  const setSymbol = useStockStore((state) => state.setSymbol);
   const [message, setMessage] = useState("");
   const [stockSymbol, setStockSymbol] = useState("");
 
   const sendMessage = async () => {
-    const match = message.match(/Show me stock (\w+)/i);
-    if (match) {
-      const symbol = match[1];
-      setStockSymbol(`NASDAQ:${symbol}`);
-      return;
-    }
-
+    // Clear the input field and update the messages state to include the new user message
     setMessage("");
     setMessages((prevMessages) => [
       ...prevMessages,
@@ -29,6 +25,7 @@ export default function Assistant() {
     ]);
 
     try {
+      // Fetch the response from the chat API
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -37,33 +34,85 @@ export default function Assistant() {
         body: JSON.stringify([...messages, { role: "user", content: message }]),
       });
 
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let result = "";
+      let result = ""; // Variable to store the entire response
 
-      await reader.read().then(function processText({ done, value }) {
+      // Function to handle reading the stream
+      const processText = ({ done, value }) => {
         if (done) {
-          console.log("Stream finished:", result);
-          return result;
+          // When the stream is complete, log the full accumulated result
+          extractTickerJSON(result);
+          return;
         }
+
+        // Decode the current chunk of text
         const text = decoder.decode(value || new Int8Array(), { stream: true });
+        result += text; // Accumulate the streamed text
+
+        // Update the last message in the state with the accumulated result so far
         setMessages((messages) => {
-          let lastMessage = messages[messages.length - 1];
-          let otherMessages = messages.slice(0, messages.length - 1);
+          const lastMessage = messages[messages.length - 1];
+          const otherMessages = messages.slice(0, messages.length - 1);
           return [
             ...otherMessages,
             {
               ...lastMessage,
-              content: lastMessage.content + text,
+              content: result, // Update the message with the accumulated result
             },
           ];
         });
+
+        // Continue reading the stream
         return reader.read().then(processText);
-      });
+      };
+
+      // Start reading the stream and handle potential errors
+      reader
+        .read()
+        .then(processText)
+        .catch((error) => {
+          console.error("Error reading from the stream:", error);
+        });
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Error while sending the message:", error);
     }
   };
+
+  const extractTickerJSON = (text) => {
+    // Use a regular expression to extract the ticker JSON part, capturing everything inside the backticks
+    const jsonStringMatch = text.match(
+      /```json\s*("ticker":\s*\[\s*{[^}]*}\s*\])\s*```/s
+    );
+
+    // Check if jsonStringMatch is not null and has a valid match
+    if (jsonStringMatch && jsonStringMatch[1]) {
+      // Extracted JSON string
+      const jsonString = `{ ${jsonStringMatch[1]} }`; // Properly wrap in {}
+
+      // Parse the JSON object
+      try {
+        const jsonObject = JSON.parse(jsonString);
+
+        // Use the JSON object
+        const newSymbol = jsonObject.ticker[0].symbol; // Output: TSLA
+        setStockSymbol(`NASDAQ:${newSymbol}`);
+        if (newSymbol) {
+          setSymbol(newSymbol);
+        }
+        // Perform additional actions with the extracted JSON object here
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+      }
+    } else {
+      console.error("No ticker JSON object found in the response.");
+    }
+  };
+
   return (
     <Stack
       direction="column"
@@ -86,16 +135,15 @@ export default function Assistant() {
         p={2}
         maxHeight="100%"
       >
-        {messages.map((message, index) => (
+        {messages.map((msg, index) => (
           <Box
             key={index}
             display="flex"
             justifyContent={
-              message.role === "assistant" ? "flex-start" : "flex-end"
+              msg.role === "assistant" ? "flex-start" : "flex-end"
             }
           >
             <Box
-              // bgcolor={message.role === "assistant" ? "#087f5b" : "#c92a2a"}
               p={2}
               borderRadius="10px"
               width="fit-content"
@@ -103,12 +151,14 @@ export default function Assistant() {
               display="flex"
               alignItems="center"
               sx={{
-                color: "white",
+                color: msg.role === "assistant" ? "#212529" : "#f8f9fa",
                 fontFamily: "Roboto, sans-serif",
                 fontWeight: "bold",
+                backgroundColor:
+                  msg.role === "assistant" ? "#f8f9fa" : "#212529",
               }}
             >
-              {message.content}
+              {msg.content}
             </Box>
           </Box>
         ))}
