@@ -1,213 +1,266 @@
 /* Container */
 .container {
     margin: 0;
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f4f4;
-    color: #333;
-}
-
-/* Hero Section */
-.heroSection {
-    background-color: #f4f4f4;
+    font-family: "Arial", sans-serif;
+    background-color: #0a0a0a;
+    color: #f8f9fa;
+    border: 1px solid #00ffff; /* Border */
+    box-shadow: 0 0 10px #00ffff; /* Box shadow */
+  }
+  
+  /* Hero Section */
+  .heroSection {
+    background-color: #0a0a0a;
     padding: 80px 20px;
     text-align: center;
-}
-
-.heroSection h1 {
+    border: 1px solid #00ffff; /* Border */
+    box-shadow: 0 0 10px #00ffff; /* Box shadow */
+  }
+  
+  .heroSection h1 {
     font-size: 48px;
     margin-bottom: 20px;
-    color: #000;
-}
-
-.heroSection h2 {
+    color: #00ffff;
+  }
+  
+  .heroSection h2 {
     font-size: 48px;
     margin-bottom: 20px;
-    color: #00aaff;
-}
-
-.heroSection p {
+    color: #f8f9fa;
+  }
+  
+  .heroSection p {
     font-size: 18px;
-    color: #000000;
+    color: #f8f9fa;
     margin-bottom: 20px;
-}
-
-.ctaButtons {
+  }
+  
+  .ctaButtons {
     display: flex;
     justify-content: center;
     gap: 20px;
-}
-
-.joinNow {
-    background-color: #000;
-    color: #fff;
+  }
+  
+  .joinNow {
+    background-color: #e67700;
+    color: #0a0a0a;
     padding: 15px 30px;
     border: none;
     cursor: pointer;
     font-size: 18px;
     border-radius: 5px;
-}
-
-.counter {
+  }
+  
+  .joinNow:hover {
+    transform: translateY(-10px); /* Elevate up */
+    box-shadow: 0 0 20px #00ffff; /* Enhanced shadow for elevation effect */
+    transition: 0.3s all;
+  }
+  
+  .counter {
     font-size: 16px;
     color: #555;
-}
-
-/* Features Section */
-.featuresSection {
+  }
+  
+  /* Features Section */
+  .featuresSection {
     display: flex;
     justify-content: space-around;
     padding: 50px 20px;
-    background-color: #fff;
+    background-color: #0a0a0a;
     gap: 20px;
-}
-
-.featureBoxes {
+    border: 1px solid #00ffff; /* Border */
+    box-shadow: 0 0 10px #00ffff; /* Box shadow */
+  }
+  
+  .featureBoxes {
     display: flex;
     justify-content: space-around;
     gap: 20px;
-}
-
-.featureBox {
-    background-color: #e6f7ff;
+  }
+  
+  .featureBox {
+    background-color: #0a0a0a;
     padding: 20px;
     border-radius: 10px;
     text-align: center;
     flex: 1;
     max-width: 200px;
+    border: 1px solid #00ffff; /* Border */
+    box-shadow: 0 0 10px #00ffff; /* Box shadow */
     /* Add space for icons */
     padding: 20px;
-}
-
-.featureBox img {
+  }
+  
+  .featureBox:hover {
+    transform: translateY(-10px); /* Elevate up */
+    box-shadow: 0 0 20px #00ffff; /* Enhanced shadow for elevation effect */
+    transition: 0.3s all;
+  }
+  
+  .featureBox img {
     width: 50px;
     height: 50px;
     margin-bottom: 10px;
-}
-
-.featureBox h3 {
+  }
+  
+  .featureBox h3 {
     font-size: 22px;
     margin-bottom: 15px;
-    color: #00aaff;
-}
-
-.featureBox p {
+    color: #00ffff;
+  }
+  
+  .featureBox p {
     font-size: 16px;
-}
-
-/* Pricing Section */
-.pricingSection {
+  }
+  
+  .features-icon {
+    width: 10px;
+    height: 10px;
+    color: #00ffff;
+  }
+  
+  /* Pricing Section */
+  .pricingSection {
     padding: 50px 20px;
-    background-color: #fff;
+    background-color: #0a0a0a;
     text-align: center;
-}
-
-.pricingSection h2 {
+    border: 1px solid #00ffff; /* Border */
+    box-shadow: 0 0 10px #00ffff; /* Box shadow */
+  }
+  
+  .pricingSection h2 {
     font-size: 36px;
     margin-bottom: 30px;
-    color: #00aaff;
-}
-
-.pricingPlans {
+    color: #00ffff;
+  }
+  
+  .pricingPlans {
     display: flex;
     justify-content: center;
     gap: 20px;
-}
-
-.plan {
-    background-color: #00aaff;
+  }
+  
+  .plan {
+    background-color: #0a0a0a;
     padding: 20px;
     border-radius: 10px;
     text-align: center;
     max-width: 300px;
     flex: 1;
-    border: 5px solid #000; /* Thick black border around the electric blue box */
-}
-
-.plan h3 {
+    border: 1px solid #00ffff; /* Border */
+    box-shadow: 0 0 10px #00ffff; /* Box shadow */
+  }
+  
+  .plan:hover {
+    transform: translateY(-10px); /* Elevate up */
+    box-shadow: 0 0 20px #00ffff; /* Enhanced shadow for elevation effect */
+    transition: 0.3s all;
+  }
+  
+  .plan h3 {
     font-size: 24px;
     margin-bottom: 15px;
-    color: #000;
-}
-
-.plan p {
+    color: #00ffff;
+  }
+  
+  .plan p {
     font-size: 18px;
     color: #fff;
-}
-
-/* Benefits Section */
-.benefitsSection {
+  }
+  
+  /* Benefits Section */
+  .benefitsSection {
     padding: 50px 20px;
-    background-color: #f9f9f9;
+    background-color: #0a0a0a;
     text-align: center;
-}
-
-.benefitsSection h2 {
+    border: 1px solid #00ffff; /* Border */
+    box-shadow: 0 0 10px #00ffff; /* Box shadow */
+  }
+  
+  .benefitsSection h2 {
     font-size: 36px;
     margin-bottom: 30px;
-    color: #000;
-}
-
-.benefitCards {
+    color: #00ffff;
+  }
+  
+  .benefitCards {
     display: flex;
     justify-content: space-around;
     flex-wrap: wrap;
     gap: 20px;
-}
-
-.benefitCard {
-    background-color: #fff;
+  }
+  
+  .benefitCard {
+    background-color: #0a0a0a;
     border: 2px solid #e6f7ff;
     padding: 20px;
     border-radius: 10px;
     max-width: 300px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px #00ffff; /* Box shadow */
     flex: 1;
-}
-
-.benefitCard h3 {
+  }
+  
+  .benefitCard:hover {
+    transform: translateY(-10px); /* Elevate up */
+    box-shadow: 0 0 20px #00ffff; /* Enhanced shadow for elevation effect */
+    transition: 0.3s all;
+  }
+  
+  .benefitCard h3 {
     font-size: 24px;
     margin-bottom: 15px;
-    color: #00aaff;
-}
-
-.benefitCard p {
+    color: #00ffff;
+  }
+  
+  .benefitCard p {
     font-size: 16px;
-    color: #555;
-}
-
-/* Waitlist Section */
-.waitlistSection {
+    color: #f8f9fa;
+  }
+  
+  /* Waitlist Section */
+  .waitlistSection {
     padding: 50px 20px;
     background-color: #000;
     color: #fff;
     text-align: center;
-}
-
-.waitlistSection h2 {
+    border: 1px solid #00ffff; /* Border */
+    box-shadow: 0 0 10px #00ffff; /* Box shadow */
+  }
+  
+  .waitlistSection h2 {
     font-size: 36px;
-    color: #00aaff;
-}
-
-.waitlistSection p {
+    color: #00ffff;
+  }
+  
+  .waitlistSection p {
     font-size: 18px;
     margin-bottom: 20px;
-}
-
-.waitlistSection form input[type="email"] {
+  }
+  
+  .waitlistSection form input[type="email"] {
     padding: 15px;
     font-size: 16px;
     width: 300px;
     margin-right: 10px;
     border: none;
     border-radius: 5px;
-}
-
-.waitlistSection form input[type="submit"] {
-    background-color: #00aaff;
-    color: #fff;
+  }
+  
+  .waitlistSection form input[type="submit"] {
+    background-color: #e67700;
+    color: #0a0a0a;
     padding: 15px 30px;
     border: none;
     cursor: pointer;
     font-size: 18px;
     border-radius: 5px;
-}
+  }
+  
+  .waitlistSection:hover form input[type="submit"] {
+    transform: translateY(-10px); /* Elevate up */
+    box-shadow: 0 0 20px #00ffff; /* Enhanced shadow for elevation effect */
+    transition: 0.3s all;
+  }
+  
+  

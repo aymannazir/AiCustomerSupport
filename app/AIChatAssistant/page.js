@@ -1,35 +1,59 @@
 "use client";
-import { useState } from "react";
-import StockChartWidget from "./StockChartWidget"; // Ensure this path is correct
-import { Box, Button, ListItemButton, ListItemText, List, Drawer, Typography, Stack, TextField } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Button,
+  ListItemButton,
+  ListItemText,
+  List,
+  Drawer,
+  Typography,
+  Stack,
+  TextField,
+} from "@mui/material";
+import { useRouter } from "next/navigation"; // Import useRouter
+import useStockStore from "./useUserstore";
+import StockChartWidget from "./StockChartWidget"; // Adjust the path as necessary
+import { OpenIcon, CloseIcon, GraphIcon } from "./icons"; // Adjust the path as necessary
 
-const AiChatAssistant = () => {
+export default function Home() {
+  const router = useRouter(); // Initialize the router
+
+  // -------------------- Drawer States and Handlers --------------------
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const toggleDrawer = () => setDrawerOpen((prev) => !prev);
+
+  // -------------------- Chart States and Handlers --------------------
+  const [chartOpen, setChartOpen] = useState(false);
+  const symbol = useStockStore((state) => state.symbol);
+  const toggleChart = () => setChartOpen((prev) => !prev);
+
+  useEffect(() => {
+    if (symbol !== "") {
+      setChartOpen(true);
+    }
+  }, [symbol]);
+
+  // -------------------- AI Chat Assistant States and Handlers --------------------
   const [messages, setMessages] = useState([
     {
       role: "assistant",
       content: "I am an AI-powered customer support assistant, how can I help you?",
     },
   ]);
-
+  const setSymbolStore = useStockStore((state) => state.setSymbol);
   const [message, setMessage] = useState("");
   const [stockSymbol, setStockSymbol] = useState("");
-  const [chartOpen, setChartOpen] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const sendMessage = async () => {
-    const match = message.match(/Show me stock (\w+)/i);
-    if (match) {
-      const symbol = match[1];
-      setStockSymbol(`NASDAQ:${symbol}`);
-      return;
-    }
+    if (message.trim() === "") return; // Prevent sending empty messages
 
-    setMessage("");
     setMessages((prevMessages) => [
       ...prevMessages,
       { role: "user", content: message },
       { role: "assistant", content: "" },
     ]);
+    setMessage("");
 
     try {
       const response = await fetch("/api/chat", {
@@ -37,45 +61,85 @@ const AiChatAssistant = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify([...messages, { role: "user", content: message }]),
+        body: JSON.stringify([
+          ...messages,
+          { role: "user", content: message },
+        ]),
       });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let result = "";
 
-      await reader.read().then(function processText({ done, value }) {
+      const processText = ({ done, value }) => {
         if (done) {
-          console.log("Stream finished:", result);
-          return result;
+          extractTickerJSON(result);
+          return;
         }
+
         const text = decoder.decode(value || new Int8Array(), { stream: true });
-        setMessages((messages) => {
-          let lastMessage = messages[messages.length - 1];
-          let otherMessages = messages.slice(0, messages.length - 1);
+        result += text;
+
+        setMessages((prevMessages) => {
+          const lastMessage = prevMessages[prevMessages.length - 1];
+          const otherMessages = prevMessages.slice(0, prevMessages.length - 1);
           return [
             ...otherMessages,
             {
               ...lastMessage,
-              content: lastMessage.content + text,
+              content: result,
             },
           ];
         });
+
         return reader.read().then(processText);
+      };
+
+      reader.read().then(processText).catch((error) => {
+        console.error("Error reading from the stream:", error);
       });
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Error while sending the message:", error);
     }
   };
 
-  const toggleChart = () => {
-    setChartOpen(!chartOpen);
+  const extractTickerJSON = (text) => {
+    const jsonStringMatch = text.match(
+      /```json\s*("ticker":\s*\[\s*{[^}]*}\s*\])\s*```/s
+    );
+
+    if (jsonStringMatch && jsonStringMatch[1]) {
+      const jsonString = `{ ${jsonStringMatch[1]} }`;
+
+      try {
+        const jsonObject = JSON.parse(jsonString);
+        const newSymbol = jsonObject.ticker[0].symbol;
+        setStockSymbol(`NASDAQ:${newSymbol}`);
+        if (newSymbol) {
+          setSymbolStore(newSymbol);
+        }
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+      }
+    } else {
+      console.error("No ticker JSON object found in the response.");
+    }
   };
 
-  const toggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
+  // -------------------- Navigation Handlers --------------------
+  const handleNavigateToHome = () => {
+    router.push("/"); // Navigate to the homepage (assumes the homepage is in the root route)
   };
 
+  const handleNavigateToAIChat = () => {
+    router.push("/AIChatAssistant"); // Navigate to the AI Chat page (adjust route as necessary)
+  };
+
+  // -------------------- Rendered UI --------------------
   return (
     <Box
       display="flex"
@@ -89,7 +153,7 @@ const AiChatAssistant = () => {
         position: "relative",
       }}
     >
-      {/* Title at the top */}
+      {/* Title Bar */}
       <Box
         display="flex"
         justifyContent="center"
@@ -102,9 +166,10 @@ const AiChatAssistant = () => {
           zIndex: 1201,
         }}
       >
-        <Typography variant="h4">StockAdvisor AI</Typography>
+        <Typography variant="h4">stockLink</Typography>
       </Box>
 
+      {/* Main Content Area */}
       <Box
         display="flex"
         flexDirection="row"
@@ -114,7 +179,7 @@ const AiChatAssistant = () => {
         alignItems="center"
         sx={{ position: "relative" }}
       >
-        {/* Drawer for the sidebar */}
+        {/* Drawer (Sidebar) */}
         <Drawer
           anchor="left"
           open={drawerOpen}
@@ -132,16 +197,17 @@ const AiChatAssistant = () => {
           }}
         >
           <List>
-            <ListItemButton>
+            <ListItemButton onClick={handleNavigateToHome}>
               <ListItemText primary="Home" />
             </ListItemButton>
-            <ListItemButton>
+            <ListItemButton onClick={handleNavigateToAIChat}>
               <ListItemText primary="AI Assistant" />
             </ListItemButton>
             <ListItemButton>
               <ListItemText primary="Graph" />
             </ListItemButton>
           </List>
+          {/* Close Button for Drawer */}
           <Button
             onClick={toggleDrawer}
             aria-label="Close drawer"
@@ -161,11 +227,11 @@ const AiChatAssistant = () => {
               },
             }}
           >
-            X
+            <CloseIcon />
           </Button>
         </Drawer>
 
-        {/* Main content area */}
+        {/* Main Content Flex Container */}
         <Box
           flexGrow={1}
           display="flex"
@@ -173,8 +239,9 @@ const AiChatAssistant = () => {
           height="100%"
           alignItems="center"
           justifyContent="center"
-          sx={{ marginLeft: drawerOpen ? 240 : 0 }}
+          sx={{ marginLeft: drawerOpen ? 240 : 0, padding: 2 }}
         >
+          {/* Stock Chart Widget */}
           {chartOpen && (
             <Box
               width="50%"
@@ -189,35 +256,29 @@ const AiChatAssistant = () => {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
+                marginRight: 2,
               }}
             >
-              <StockChartWidget sy={stockSymbol} key={stockSymbol} />
+              <StockChartWidget sy={symbol} key={symbol} />
             </Box>
           )}
+
+          {/* AI Chat Assistant Interface */}
           <Stack
             direction="column"
-            width="50%"
+            width={chartOpen ? "50%" : "80%"}
             height="700px"
-            border="1px solid #444"
             p={2}
             spacing={3}
             sx={{
               backgroundColor: "#0A0A0A",
               borderTopRightRadius: "10px",
               borderBottomRightRadius: "10px",
-              borderColor: "#00FFFF",
-              boxShadow: "0 0 10px #00FFFF",
               overflow: "hidden",
+              boxShadow: "0 0 10px #00FFFF",
             }}
           >
-            <Typography
-              variant="h4"
-              align="center"
-              gutterBottom
-              sx={{ color: "white" }}
-            >
-              AI Stock Assistant
-            </Typography>
+            {/* Messages Display */}
             <Stack
               direction="column"
               flexGrow={1}
@@ -225,76 +286,54 @@ const AiChatAssistant = () => {
               spacing={2}
               p={2}
               maxHeight="100%"
+              sx={{
+                backgroundColor: "#0A0A0A",
+              }}
             >
-              {messages.map((message, index) => (
+              {messages.map((msg, index) => (
                 <Box
                   key={index}
                   display="flex"
                   justifyContent={
-                    message.role === "assistant" ? "flex-start" : "flex-end"
+                    msg.role === "assistant" ? "flex-start" : "flex-end"
                   }
                 >
                   <Box
-                    bgcolor={
-                      message.role === "assistant" ? "#087f5b" : "#c92a2a"
-                    }
-                    p={2}
+                    px={2}
+                    py={1}
                     borderRadius="10px"
-                    width="fit-content"
-                    maxWidth="80%"
-                    display="flex"
-                    alignItems="center"
-                    sx={{
-                      color: "white",
-                      fontFamily: "Roboto, sans-serif",
-                      fontWeight: "bold",
-                    }}
+                    bgcolor={
+                      msg.role === "assistant" ? "#0078D4" : "#00FFFF"
+                    }
+                    color="#FFF"
+                    sx={{ maxWidth: "70%" }}
                   >
-                    {message.content}
+                    {msg.content}
                   </Box>
                 </Box>
               ))}
             </Stack>
-            <Stack direction="row" spacing={2}>
+
+            {/* Message Input Box */}
+            <Stack direction="row" spacing={2} width="100%">
               <TextField
-                label="Message"
                 fullWidth
+                placeholder="Enter your message..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 sx={{
-                  input: { color: "white" },
-                  label: { color: "white" },
-                  "& .MuiOutlinedInput-root": {
-                    "& fieldset": {
-                      borderColor: "white",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "#00FFFF",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#00FFFF",
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: "white",
-                  },
-                  "& .MuiInputLabel-root.Mui-focused": {
-                    color: "#00FFFF",
-                  },
-                  "& .MuiInputLabel-root:hover": {
-                    color: "#00FFFF",
-                  },
+                  input: { color: "#00FFFF" },
+                  borderColor: "#00FFFF",
                 }}
               />
               <Button
-                variant="contained"
                 onClick={sendMessage}
+                variant="contained"
                 sx={{
-                  backgroundColor: "#00FFFF",
-                  color: "#000000",
-                  boxShadow: "0 0 10px #00FFFF",
+                  bgcolor: "#00FFFF",
+                  color: "#000",
                   "&:hover": {
-                    backgroundColor: "#00CED1",
+                    bgcolor: "#00CED1",
                     boxShadow: "0 0 15px #00FFFF",
                   },
                 }}
@@ -304,57 +343,32 @@ const AiChatAssistant = () => {
             </Stack>
           </Stack>
         </Box>
+
+        {/* Drawer Open Button */}
+        {!drawerOpen && (
+          <Button
+            onClick={toggleDrawer}
+            aria-label="Open drawer"
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: 20,
+              backgroundColor: "#00FFFF",
+              color: "#000",
+              zIndex: 1201,
+              borderRadius: "50%",
+              minWidth: "auto",
+              padding: 1,
+              "&:hover": {
+                backgroundColor: "#00CED1",
+                boxShadow: "0 0 15px #00FFFF",
+              },
+            }}
+          >
+            <OpenIcon />
+          </Button>
+        )}
       </Box>
-
-      {/* Toggle button for the drawer */}
-      {!drawerOpen && (
-        <Button
-          onClick={toggleDrawer}
-          aria-label="Open drawer"
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: 20,
-            backgroundColor: "#00FFFF",
-            color: "#000",
-            zIndex: 1201,
-            borderRadius: "50%",
-            minWidth: "auto",
-            padding: 1,
-            "&:hover": {
-              backgroundColor: "#00CED1",
-              boxShadow: "0 0 15px #00FFFF",
-            },
-          }}
-        >
-          &#9776;
-        </Button>
-      )}
-
-      {/* Toggle button for the chart */}
-      <Button
-        onClick={toggleChart}
-        aria-label="Toggle stock chart"
-        sx={{
-          position: "absolute",
-          top: "10px",
-          right: "10px",
-          backgroundColor: "#00FFFF",
-          color: "#000",
-          zIndex: 1201,
-          borderRadius: "50%",
-          minWidth: "auto",
-          padding: 1,
-          "&:hover": {
-            backgroundColor: "#00CED1",
-            boxShadow: "0 0 15px #00FFFF",
-          },
-        }}
-      >
-        {chartOpen ? "Hide Chart" : "Show Chart"}
-      </Button>
     </Box>
   );
-};
-
-export default AiChatAssistant;
+}
